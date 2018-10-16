@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MapTour</string>
+    <string name="title_activity_destinations">DestinationsActivity</string>
+</resources>
