@@ -1,22 +1,24 @@
 package petersoboyejo.com.maptour;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.EditText;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -24,6 +26,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -35,7 +38,7 @@ import java.util.Locale;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
 
     private Button mapType_button, destinations_button, myLocation_button;
     private WebView wv;
@@ -112,6 +115,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -124,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mv.onSaveInstanceState(mapViewBundle);
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -159,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gmap = googleMap;
+        gmap.setOnMapLongClickListener(this);
         gmap.setMinZoomPreference(12);
         gmap.setIndoorEnabled(true);
         if (currentDestination != null) {
@@ -166,7 +173,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    public void onMapLongClick(final LatLng point) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Name your mark");
+        View viewInflated = LayoutInflater.from(this).inflate(R.layout.text_input_marker, null, false);
+        final EditText input = (EditText) viewInflated.findViewById(R.id.input);
+        builder.setView(viewInflated);
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                gmap.clear();
+                gmap.addMarker(new MarkerOptions()
+                        .position(point)
+                        .title(input.getText().toString())
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                dialog.dismiss();
+            }
+        });
+
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+
+    }
+
     private void changeDestination(double latitude, double longitude, String wikiLink) {
+        gmap.clear();
         LatLng position = new LatLng(latitude, longitude);
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(position);
