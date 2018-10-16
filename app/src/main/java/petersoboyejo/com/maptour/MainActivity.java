@@ -1,8 +1,8 @@
 package petersoboyejo.com.maptour;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -10,11 +10,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -31,6 +29,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
@@ -78,22 +80,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.requestPermission();
         client = LocationServices.getFusedLocationProviderClient(this);
 
-        mapType_button = (Button) findViewById(R.id.mapType_button);
-        destinations_button = (Button) findViewById(R.id.destinations_button);
-        myLocation_button = (Button) findViewById(R.id.myLocation_button);
+        mapType_button = findViewById(R.id.mapType_button);
+        destinations_button = findViewById(R.id.destinations_button);
+        myLocation_button = findViewById(R.id.myLocation_button);
 
         mapType_button.setOnClickListener(this);
         destinations_button.setOnClickListener(this);
         myLocation_button.setOnClickListener(this);
 
-        wv = (WebView) findViewById(R.id.webView);
+        wv = findViewById(R.id.webView);
         wv.setWebViewClient(new MyBrowser());
         wv.getSettings().setLoadsImagesAutomatically(true);
         wv.getSettings().setJavaScriptEnabled(true);
         wv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
 
         /* Init Map View */
-        mv = (MapView) findViewById(R.id.mapView);
+        mv = findViewById(R.id.mapView);
 
     }
 
@@ -169,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         gmap.setMinZoomPreference(12);
         gmap.setIndoorEnabled(true);
         if (currentDestination != null) {
+            gmap.clear();
             this.changeDestination(currentDestination.getLatitude(), currentDestination.getLongitude(), currentDestination.getWikiLink());
         }
     }
@@ -185,12 +188,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
                 gmap.clear();
                 gmap.addMarker(new MarkerOptions()
                         .position(point)
                         .title(input.getText().toString())
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                gmap.moveCamera(CameraUpdateFactory.newLatLng(point));
+
+                /* Add to Local Storage */
+                MainActivity.this.addDestination(input.getText().toString(), point.latitude, point.longitude);
                 dialog.dismiss();
+
             }
         });
 
@@ -217,6 +226,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void addDestination(String name, double lat, double lon) {
+
+        SharedPreferences destinationsPreferences = getSharedPreferences("destinationPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = destinationsPreferences.edit();
+        Log.d("destinations", destinationsPreferences.toString());
+
+        if (destinationsPreferences.contains("destinations")) {
+
+            String destinationsArr = destinationsPreferences.getString("destinations", "");
+
+            Log.d("HAHA", destinationsArr);
+
+            try {
+
+                JSONArray arr = new JSONArray(destinationsArr);
+                JSONObject obj = new JSONObject();
+                obj.put("name", name);
+                obj.put("lat", lat);
+                obj.put("lon", lon);
+                arr.put(obj);
+
+                editor.putString("destinations", arr.toString());
+                editor.commit();
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // New users
+            editor.putString("destinations", new JSONArray().toString());
+            editor.commit();
+        }
+    }
+
     private void mapTypeAction() {
 
     }
@@ -227,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void myLocationAction() {
+        gmap.clear();
         if (ActivityCompat.checkSelfPermission(MainActivity.this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
             return;
         }

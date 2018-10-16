@@ -1,6 +1,9 @@
 package petersoboyejo.com.maptour;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -8,11 +11,19 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class DestinationsActivity extends AppCompatActivity {
 
@@ -73,9 +84,48 @@ public class DestinationsActivity extends AppCompatActivity {
         }
 
         private void init() {
+
+
+            SharedPreferences destinationsPreferences = getSharedPreferences("destinationPrefs", MODE_PRIVATE);
+
+            if (destinationsPreferences.contains("destinations")) {
+
+                String destinationsArr = destinationsPreferences.getString("destinations", "");
+                JSONArray arr = null;
+
+                try {
+                    arr = new JSONArray(destinationsArr);
+                    for (int i = 0; i < arr.length(); i++){
+                        JSONObject obj = arr.getJSONObject(i);
+
+                        String name = obj.getString("name");
+                        double lat = obj.getDouble("lat");
+                        double lon = obj.getDouble("lon");
+
+                        Geocoder geocoder = new Geocoder(DestinationsActivity.this, Locale.getDefault());
+                        String url = "";
+
+                        try {
+                            List<Address> addresses  = geocoder.getFromLocation(lat,lon, 1);
+                            url = addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea();
+                            Log.d("DEBUG", addresses.toString());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        destinations.add(new Location(name, "https://en.wikipedia.org/wiki/" + url, lat, lon));
+
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
             destinations.add(new Location("Alcatraz Island", "https://en.wikipedia.org/wiki/Alcatraz_Island", 37.826667, -122.422778));
             destinations.add(new Location("Golden Gate Bridge", "https://en.wikipedia.org/wiki/Golden_Gate_Bridge", 37.819722, -122.478611));
             destinations.add(new Location("Lincoln Memorial", "https://en.wikipedia.org/wiki/Lincoln_Memorial", 38.889306, -77.050111));
             destinations.add(new Location("Grand Central Terminal", "https://en.wikipedia.org/wiki/Grand_Central_Terminal", 40.752800, -73.976522));
+
         }
 }

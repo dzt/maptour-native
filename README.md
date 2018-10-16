@@ -11,8 +11,8 @@ MapTour Native Conversion from the AP CSP Course
 More information on configuration will be added soon.
 
 ## Todo List
-- [ ] Add SQLite and Custom Locations
-- [ ] Minor bug fixes
+- [x] Add SQLite and Custom Locations
+- [x] Minor bug fixes
 
 
 ### Who
