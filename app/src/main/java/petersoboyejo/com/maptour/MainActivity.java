@@ -17,6 +17,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -262,6 +263,59 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void mapTypeAction() {
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Select Map Type");
+
+        //list of items
+        String[] items = getResources().getStringArray(R.array.map_types);
+        builder.setSingleChoiceItems(items, -1,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ListView lv = ((AlertDialog)dialog).getListView();
+                        lv.setTag(new Integer(which));
+                    }
+        });
+
+        String positiveText = getString(android.R.string.ok);
+        builder.setPositiveButton(positiveText,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ListView lv = ((AlertDialog)dialog).getListView();
+                        Integer selected = (Integer)lv.getTag();
+                        if(selected != null) {
+                            switch (selected) {
+                                case 0:
+                                    gmap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                                    break;
+                                case 1:
+                                    gmap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                                    break;
+                                case 2:
+                                    gmap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                                    break;
+                                case 3:
+                                    gmap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                                    break;
+                            }
+                            Log.d("WHICH", selected + "");
+                        }
+                    }
+                });
+
+        String negativeText = getString(android.R.string.cancel);
+        builder.setNegativeButton(negativeText,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // negative button logic
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        // display dialog
+        dialog.show();
     }
 
     private void destinationsAction() {

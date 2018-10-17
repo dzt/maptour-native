@@ -13,7 +13,7 @@ More information on configuration will be added soon.
 ## Todo List
 - [x] Add SQLite and Custom Locations
 - [x] Minor bug fixes
-
+- [x] Map Type
 
 ### Who
 Written by <a href="http://petersoboyejo.com/">@dzt</a>, made better by you.
