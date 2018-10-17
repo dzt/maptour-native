@@ -106,13 +106,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button _b = (Button) findViewById(v.getId());
 
         switch (v.getId()) {
-            case R.id.mapType_button: this.mapTypeAction();
+            case R.id.mapType_button:
+                this.mapTypeAction();
                 Log.d("Button Pressed", _b.getText() + "");
                 break;
-            case R.id.destinations_button: this.destinationsAction();
+            case R.id.destinations_button:
+                this.destinationsAction();
                 Log.d("Button Pressed", _b.getText() + "");
                 break;
-            case R.id.myLocation_button: this.myLocationAction();
+            case R.id.myLocation_button:
+                this.myLocationAction();
                 Log.d("Button Pressed", _b.getText() + "");
                 break;
         }
@@ -272,19 +275,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ListView lv = ((AlertDialog)dialog).getListView();
+                        ListView lv = ((AlertDialog) dialog).getListView();
                         lv.setTag(new Integer(which));
                     }
-        });
+                });
 
         String positiveText = getString(android.R.string.ok);
         builder.setPositiveButton(positiveText,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ListView lv = ((AlertDialog)dialog).getListView();
-                        Integer selected = (Integer)lv.getTag();
-                        if(selected != null) {
+                        ListView lv = ((AlertDialog) dialog).getListView();
+                        Integer selected = (Integer) lv.getTag();
+                        if (selected != null) {
                             switch (selected) {
                                 case 0:
                                     gmap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -308,13 +311,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         builder.setNegativeButton(negativeText,
                 new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // negative button logic
-                    }
+                    public void onClick(DialogInterface dialog, int which) {}
                 });
 
         AlertDialog dialog = builder.create();
-        // display dialog
         dialog.show();
     }
 
@@ -325,15 +325,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void myLocationAction() {
         gmap.clear();
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        client.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener<android.location.Location>() {
+        client.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener < android.location.Location > () {
 
             double lat, lon;
             @Override
             public void onSuccess(android.location.Location location) {
-                if(location!= null){
+                if (location != null) {
                     Log.d("LOCATION", location.toString());
                     lat = location.getLatitude();
                     lon = location.getLongitude();
@@ -349,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     String url = "";
 
                     try {
-                        List<Address> addresses  = geocoder.getFromLocation(lat,lon, 1);
+                        List < Address > addresses = geocoder.getFromLocation(lat, lon, 1);
                         url = addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea();
                         Log.d("DEBUG", addresses.toString());
                     } catch (IOException e) {
@@ -363,8 +363,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void requestPermission(){
-        ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 1);
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(this, new String[] {
+                ACCESS_FINE_LOCATION
+        }, 1);
     }
 
     private class MyBrowser extends WebViewClient {
@@ -376,4 +378,3 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 }
-
