@@ -5,6 +5,8 @@ MapTour Native Conversion from the AP CSP Course
 
 [Video](https://youtu.be/xXZ34abjVks)
 
+[APK Download](https://github.com/dzt/maptour-native/releases)
+
 ![screenshot](https://i.imgur.com/pIed0R6.png)
 
 
